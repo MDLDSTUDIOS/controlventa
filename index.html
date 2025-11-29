@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+    * { box-sizing: border-box; }
+    
     body {
         font-family: 'Poppins', sans-serif;
         margin: 0;
@@ -16,6 +18,38 @@
         color: #333;
         display: flex;
         justify-content: center;
+        transition: background 0.3s, color 0.3s;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body.dark-mode {
+        background: #1a1a2e;
+        color: #eee;
+    }
+
+    /* Partículas flotantes de fondo */
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+    }
+
+    .particle {
+        position: absolute;
+        font-size: 24px;
+        opacity: 0.3;
+        animation: float 15s infinite ease-in-out;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(100vh) rotate(0deg); }
+        50% { transform: translateY(-20vh) rotate(180deg); }
     }
 
     .container {
@@ -27,6 +61,14 @@
         border-radius: 18px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         animation: fadeIn 0.7s ease;
+        position: relative;
+        z-index: 1;
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+
+    body.dark-mode .container {
+        background: #16213e;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
     @keyframes fadeIn {
@@ -34,10 +76,37 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
+    .header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
     h1 {
         text-align: center;
         font-weight: 600;
-        margin-bottom: 20px;
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .dark-mode-toggle {
+        background: #4A6CF7;
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        transition: transform 0.2s, background 0.3s;
+    }
+
+    .dark-mode-toggle:hover {
+        transform: scale(1.1) rotate(20deg);
+    }
+
+    body.dark-mode .dark-mode-toggle {
+        background: #ffd93d;
     }
 
     h2 {
@@ -48,6 +117,10 @@
         color: #4A6CF7;
     }
 
+    body.dark-mode h2 {
+        color: #6c8fff;
+    }
+
     input, button {
         width: 100%;
         padding: 12px;
@@ -55,13 +128,22 @@
         border-radius: 10px;
         border: 1px solid #ccc;
         font-size: 14px;
-        transition: 0.2s;
+        transition: all 0.2s;
+        background: white;
+        color: #333;
+    }
+
+    body.dark-mode input {
+        background: #0f3460;
+        border-color: #1f4068;
+        color: #eee;
     }
 
     input:focus {
         outline: none;
         border-color: #4A6CF7;
         box-shadow: 0 0 4px rgba(74,108,247,0.4);
+        transform: scale(1.02);
     }
 
     button {
@@ -77,6 +159,10 @@
         background: #3a57d3;
     }
 
+    button:active {
+        transform: scale(0.98);
+    }
+
     .pedido {
         background: #f9fafc;
         border: 1px solid #e1e5ee;
@@ -85,6 +171,19 @@
         border-radius: 12px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         animation: popIn 0.3s ease;
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+    }
+
+    body.dark-mode .pedido {
+        background: #0f3460;
+        border-color: #1f4068;
+    }
+
+    .pedido:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 6px 15px rgba(74,108,247,0.3);
     }
 
     @keyframes popIn {
@@ -98,6 +197,25 @@
 
     .pendiente {
         border-left: 4px solid #f7b731;
+    }
+
+    .pedido-avatar {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
     }
 
     .acciones {
@@ -122,58 +240,227 @@
         padding: 15px;
         margin-top: 30px;
         border-radius: 14px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .total-amount {
+        display: inline-block;
+        transition: transform 0.3s;
+    }
+
+    .total-amount.pulse {
+        animation: pulse 0.5s;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    /* Toast notifications */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast {
+        background: #333;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+        min-width: 250px;
+    }
+
+    .toast.success { background: #16c47f; }
+    .toast.warning { background: #f7b731; }
+    .toast.info { background: #4A6CF7; }
+    .toast.achievement { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+    @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+        to { transform: translateX(400px); opacity: 0; }
+    }
+
+    /* Confetti */
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        top: -10px;
+        z-index: 999;
+        animation: confetti-fall 3s linear forwards;
+    }
+
+    @keyframes confetti-fall {
+        to {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+
+    /* Logros */
+    .achievements {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f0f4ff;
+        border-radius: 12px;
+    }
+
+    body.dark-mode .achievements {
+        background: #0f3460;
+    }
+
+    .achievement-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 20px;
+        font-size: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        animation: badgePop 0.5s ease;
+    }
+
+    body.dark-mode .achievement-badge {
+        background: #1f4068;
+    }
+
+    @keyframes badgePop {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .achievement-badge.locked {
+        opacity: 0.3;
+        filter: grayscale(1);
+    }
+
+    /* Easter egg Salinas */
+    @keyframes disco {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+    }
+
+    body.salinas-mode {
+        animation: disco 2s infinite linear;
+    }
+
+    .salinas-text {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 80px;
+        font-weight: bold;
+        color: #ff6b6b;
+        text-shadow: 0 0 20px #fff;
+        z-index: 9999;
+        animation: salinasAppear 2s ease-out forwards;
+        pointer-events: none;
+    }
+
+    @keyframes salinasAppear {
+        0% { 
+            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            opacity: 1;
+        }
+        50% { 
+            transform: translate(-50%, -50%) scale(1.5) rotate(180deg);
+        }
+        100% { 
+            transform: translate(-50%, -50%) scale(0) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    /* Reminder indicator */
+    .reminder-indicator {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ff6b6b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        z-index: 1000;
+        animation: pulse 2s infinite;
+        cursor: pointer;
     }
 </style>
 </head>
 <body>
 
-<!-- Start-up audio: the file the user provided -->
-<audio id="startup" src="https://screenapp.io/app/v/E1k8O8t0Lq" autoplay playsinline></audio>
+<div class="particles" id="particles"></div>
 
+<audio id="startup" src="https://www.dropbox.com/scl/fi/jo4ufxoshycr6vmkdg4hs/Bienvenido-al-sistem.mp3?rlkey=7s6jdrbw24yi0e4lg2l0nm93b&st=snfzhmqj&dl=1" autoplay playsinline></audio>
 <audio id="sound-add" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
 <audio id="sound-done" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" preload="auto"></audio>
 <audio id="sound-delete" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+<audio id="sound-cha-ching" src="https://actions.google.com/sounds/v1/office/cash_register.ogg" preload="auto"></audio>
+<audio id="sound-achievement" src="https://actions.google.com/sounds/v1/cartoon/siren_whistle.ogg" preload="auto"></audio>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <div class="container">
-<h1>Control de Ventas - Banda Orquesta</h1>
+    <div class="header-controls">
+        <button class="dark-mode-toggle" onclick="toggleDarkMode()" title="Cambiar tema">🌙</button>
+        <h1>Control de Ventas - Banda Orquesta</h1>
+        <div style="width: 40px;"></div>
+    </div>
 
-<h2>Agregar Pedido</h2>
-<input id="nombre" placeholder="Nombre del comprador">
-<input id="producto" placeholder="Producto">
-<input id="cantidad" placeholder="Cantidad" type="number">
-<input id="precio" placeholder="Precio total ($)" type="number">
-<button onclick="agregarPedido()">Agregar</button>
+    <div class="achievements" id="achievements"></div>
 
-<h2>Buscar Pedido</h2>
-<input id="buscar" placeholder="Buscar por nombre o producto" oninput="render()">
+    <h2>Agregar Pedido</h2>
+    <input id="nombre" placeholder="Nombre del comprador" oninput="checkEasterEgg(this.value)">
+    <input id="producto" placeholder="Producto">
+    <input id="cantidad" placeholder="Cantidad" type="number">
+    <input id="precio" placeholder="Precio total ($)" type="number">
+    <button onclick="agregarPedido()">Agregar</button>
 
-<h2>Pedidos Pendientes</h2>
-<div id="pendientes"></div>
+    <h2>Buscar Pedido</h2>
+    <input id="buscar" placeholder="Buscar por nombre o producto" oninput="render()">
 
-<h2>Pedidos Entregados</h2>
-<div id="entregados"></div>
+    <h2>Pedidos Pendientes</h2>
+    <div id="pendientes"></div>
 
-<div class="total-box">Total Recaudado: $<span id="total">0</span></div>
+    <h2>Pedidos Entregados</h2>
+    <div id="entregados"></div>
+
+    <div class="total-box">
+        Total Recaudado: $<span class="total-amount" id="total">0</span>
+    </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 <script>
-// --- Audio playback handling ---
-// Modern browsers block autoplay with sound until user interaction.
-// Strategy: allow autoplay muted so it can load, then play on first user interaction (click/touch).
+// --- Audio setup ---
 (function(){
   const startup = document.getElementById('startup');
-
-  // Try to play muted on load so the file is fetched in some browsers
   window.addEventListener('DOMContentLoaded', () => {
     if (startup) {
-      // ensure it's muted initially to maximize chance autoplay works
       try { startup.muted = true; startup.play().catch(()=>{}); } catch(e){}
     }
   });
-
-  // On first user interaction, unmute and play the audio once
   const unlockAudio = () => {
     if (!startup) return;
     try {
@@ -181,13 +468,11 @@
       startup.play().catch(()=>{});
     } catch(e){}
   };
-
   window.addEventListener('click', unlockAudio, { once: true });
   window.addEventListener('touchstart', unlockAudio, { once: true });
 })();
 
-// --- Firebase realtime sync ---
-// Replace the firebaseConfig object with your project's credentials.
+// --- Firebase ---
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -202,20 +487,205 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 let pedidos = [];
 let total = 0;
+let achievements = {
+  firstSale: false,
+  streak5: false,
+  total100: false,
+  speed5in10: false,
+  bigSale: false
+};
+let salesTimestamps = [];
+let lastPendingCheck = Date.now();
 
+// --- Dark Mode ---
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const btn = document.querySelector('.dark-mode-toggle');
+  btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+}
+
+if (localStorage.getItem('darkMode') === 'true') {
+  toggleDarkMode();
+}
+
+// --- Particles ---
+function createParticles() {
+  const particles = document.getElementById('particles');
+  const emojis = ['🎵', '🎶', '🎸', '🎤', '🎹', '🥁', '🎺', '✨', '⭐', '💫'];
+  for (let i = 0; i < 15; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 5 + 's';
+    particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+    particles.appendChild(particle);
+  }
+}
+createParticles();
+
+// --- Toast Notifications ---
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// --- Confetti ---
+function createConfetti() {
+  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#16c47f'];
+  for (let i = 0; i < 50; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    confetti.style.animationDuration = (2 + Math.random()) + 's';
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 3000);
+  }
+}
+
+// --- Animated Counter ---
+function animateTotal() {
+  const totalEl = document.getElementById('total');
+  totalEl.classList.add('pulse');
+  setTimeout(() => totalEl.classList.remove('pulse'), 500);
+}
+
+// --- Achievements System ---
+function checkAchievements(newSale = false, saleAmount = 0) {
+  if (newSale) {
+    salesTimestamps.push(Date.now());
+    salesTimestamps = salesTimestamps.filter(t => Date.now() - t < 600000); // últimos 10 min
+  }
+
+  // Primera venta
+  if (!achievements.firstSale && pedidos.length === 1) {
+    achievements.firstSale = true;
+    unlockAchievement('🏆 Primera Venta!', 'firstSale');
+  }
+
+  // Racha de 5 ventas
+  if (!achievements.streak5 && pedidos.length >= 5) {
+    achievements.streak5 = true;
+    unlockAchievement('🔥 Racha de 5 Ventas!', 'streak5');
+  }
+
+  // Superar $100
+  if (!achievements.total100 && total >= 100) {
+    achievements.total100 = true;
+    unlockAchievement('💰 Superaste $100!', 'total100');
+  }
+
+  // 5 ventas en 10 minutos
+  if (!achievements.speed5in10 && salesTimestamps.length >= 5) {
+    achievements.speed5in10 = true;
+    unlockAchievement('⚡ 5 Ventas en 10 Minutos!', 'speed5in10');
+  }
+
+  // Venta grande (más de $50)
+  if (!achievements.bigSale && saleAmount >= 50) {
+    achievements.bigSale = true;
+    unlockAchievement('💎 Venta Grande ($50+)!', 'bigSale');
+  }
+
+  renderAchievements();
+}
+
+function unlockAchievement(message, key) {
+  playSound('sound-achievement');
+  showToast(message, 'achievement');
+  createConfetti();
+}
+
+function renderAchievements() {
+  const container = document.getElementById('achievements');
+  const badges = [
+    { key: 'firstSale', emoji: '🏆', text: 'Primera Venta' },
+    { key: 'streak5', emoji: '🔥', text: 'Racha de 5' },
+    { key: 'total100', emoji: '💰', text: '$100 Total' },
+    { key: 'speed5in10', emoji: '⚡', text: '5 en 10 min' },
+    { key: 'bigSale', emoji: '💎', text: 'Venta Grande' }
+  ];
+
+  container.innerHTML = badges.map(b => 
+    `<div class="achievement-badge ${achievements[b.key] ? '' : 'locked'}">
+      ${b.emoji} ${b.text}
+    </div>`
+  ).join('');
+}
+
+// --- Easter Egg Salinas ---
+let salinasTimeout;
+function checkEasterEgg(value) {
+  if (value.toLowerCase().includes('salinas')) {
+    clearTimeout(salinasTimeout);
+    document.body.classList.add('salinas-mode');
+    
+    const text = document.createElement('div');
+    text.className = 'salinas-text';
+    text.textContent = '¡SALINAS! 🎉';
+    document.body.appendChild(text);
+    
+    createConfetti();
+    playSound('sound-achievement');
+    showToast('🎊 ¡Easter Egg Desbloqueado: SALINAS! 🎊', 'achievement');
+    
+    setTimeout(() => text.remove(), 2000);
+    salinasTimeout = setTimeout(() => {
+      document.body.classList.remove('salinas-mode');
+    }, 2000);
+  }
+}
+
+// --- Avatars ---
+function getAvatar(nombre) {
+  const avatars = ['🤖', '👽', '🐱', '🐶', '🦊', '🐼', '🐨', '🦁', '🐯', '🦄', '🐸', '🦉', '🐙', '🦋', '🐝'];
+  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7b731', '#5f27cd', '#16c47f', '#ff9ff3', '#54a0ff'];
+  
+  const index = nombre.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const avatar = avatars[index % avatars.length];
+  const color = colors[index % colors.length];
+  
+  return { avatar, color };
+}
+
+// --- Reminder System ---
+function checkReminders() {
+  const now = Date.now();
+  if (now - lastPendingCheck > 3600000) { // cada hora
+    const pendientes = pedidos.filter(p => !p.entregado).length;
+    if (pendientes > 0) {
+      showToast(`⏰ Tienes ${pendientes} pedido${pendientes > 1 ? 's' : ''} pendiente${pendientes > 1 ? 's' : ''}`, 'warning');
+    }
+    lastPendingCheck = now;
+  }
+}
+setInterval(checkReminders, 300000); // revisar cada 5 minutos
+
+// --- Sound player ---
 function playSound(id){
   const s = document.getElementById(id);
   if(!s) return;
   try { s.currentTime = 0; s.play().catch(()=>{}); } catch(e){}
 }
 
+// --- Firebase sync ---
 function sync(){
-  // write full state to database
   db.ref("pedidos").set(pedidos);
   db.ref("total").set(total);
+  db.ref("achievements").set(achievements);
 }
 
-// Listen for remote updates
 db.ref("pedidos").on("value", snap => {
   pedidos = snap.val() || [];
   render();
@@ -226,43 +696,79 @@ db.ref("total").on("value", snap => {
   document.getElementById("total").innerText = total;
 });
 
+db.ref("achievements").on("value", snap => {
+  achievements = snap.val() || {
+    firstSale: false,
+    streak5: false,
+    total100: false,
+    speed5in10: false,
+    bigSale: false
+  };
+  renderAchievements();
+});
+
+// --- Agregar Pedido ---
 function agregarPedido(){
   const nombre = document.getElementById("nombre").value.trim();
   const producto = document.getElementById("producto").value.trim();
   const cantidad = Number(document.getElementById("cantidad").value);
   const precio = Number(document.getElementById("precio").value);
 
-  if(!nombre || !producto || !cantidad || !precio){ alert("Completa todos los campos"); return; }
+  if(!nombre || !producto || !cantidad || !precio){ 
+    showToast('⚠️ Completa todos los campos', 'warning');
+    return; 
+  }
 
-  const pedido = { nombre, producto, cantidad, precio, entregado: false };
+  const pedido = { nombre, producto, cantidad, precio, entregado: false, timestamp: Date.now() };
   pedidos.push(pedido);
   total += precio;
 
-  playSound('sound-add');
+  // Efectos
+  playSound('sound-cha-ching');
+  createConfetti();
+  showToast(`✅ Pedido agregado: ${nombre}`, 'success');
+  animateTotal();
+  
+  // Frase motivacional random
+  const frases = ['¡Imparable!', '¡Eres una máquina!', '¡La banda está on fire! 🔥', '¡Sigue así!', '¡Excelente venta!'];
+  setTimeout(() => showToast(frases[Math.floor(Math.random() * frases.length)], 'info'), 500);
+
+  checkAchievements(true, precio);
   sync();
 
-  // clear inputs
+  // Clear inputs
   document.getElementById("nombre").value = "";
   document.getElementById("producto").value = "";
   document.getElementById("cantidad").value = "";
   document.getElementById("precio").value = "";
 }
 
+// --- Marcar Entregado ---
 function marcarEntregado(i){
   if(!pedidos[i]) return;
   pedidos[i].entregado = true;
   playSound('sound-done');
+  createConfetti();
+  showToast(`🎉 Pedido entregado a ${pedidos[i].nombre}`, 'success');
   sync();
 }
 
+// --- Eliminar Pedido ---
 function eliminarPedido(i){
   if(!pedidos[i]) return;
+  const confirmar = confirm(`¿Eliminar pedido de ${pedidos[i].nombre}?`);
+  if (!confirmar) return;
+  
   playSound('sound-delete');
+  showToast(`🗑️ Pedido eliminado`, 'info');
   total -= pedidos[i].precio;
   pedidos.splice(i,1);
+  animateTotal();
+  checkAchievements();
   sync();
 }
 
+// --- Render ---
 function render(){
   const pendientesEl = document.getElementById('pendientes');
   const entregadosEl = document.getElementById('entregados');
@@ -278,22 +784,35 @@ function render(){
     const producto = String(p.producto || '');
     if(filtro && !nombre.toLowerCase().includes(filtro) && !producto.toLowerCase().includes(filtro)) return;
 
-    const html = `\n      <div class="pedido ${p.entregado ? 'entregado' : 'pendiente'}">\n        <strong>${escapeHtml(nombre)}</strong><br>\n        ${escapeHtml(producto)} x ${p.cantidad}<br>\n        <strong>Total:</strong> $${p.precio}<br>\n        <div class="acciones">\n          ${!p.entregado ? `<button onclick="marcarEntregado(${i})">Entregar</button>` : ''}\n          <button onclick="eliminarPedido(${i})" style="background:#d9534f">Eliminar</button>\n        </div>\n      </div>\n    `;
+    const { avatar, color } = getAvatar(nombre);
+
+    const html = `
+      <div class="pedido ${p.entregado ? 'entregado' : 'pendiente'}">
+        <div class="pedido-avatar" style="background: ${color}">${avatar}</div>
+        <strong>${escapeHtml(nombre)}</strong><br>
+        ${escapeHtml(producto)} x ${p.cantidad}<br>
+        <strong>Total:</strong> $${p.precio}<br>
+        <div class="acciones">
+          ${!p.entregado ? `<button onclick="marcarEntregado(${i})">Entregar</button>` : ''}
+          <button onclick="eliminarPedido(${i})" style="background:#d9534f">Eliminar</button>
+        </div>
+      </div>
+    `;
 
     if(p.entregado) eHTML += html; else pHTML += html;
   });
 
-  pendientesEl.innerHTML = pHTML;
-  entregadosEl.innerHTML = eHTML;
+  pendientesEl.innerHTML = pHTML || '<p style="text-align:center;color:#999;">No hay pedidos pendientes</p>';
+  entregadosEl.innerHTML = eHTML || '<p style="text-align:center;color:#999;">No hay pedidos entregados</p>';
   document.getElementById('total').innerText = total;
 }
 
-// small helper to avoid injection when rendering
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g, function(m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]; });
 }
 
-// initial render (in case database is empty or delayed)
+// Initial render
+renderAchievements();
 render();
 </script>
 
